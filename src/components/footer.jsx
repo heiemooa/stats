@@ -1,5 +1,5 @@
 import React from "react";
-import { GithubOne, Home, Mail } from "@icon-park/react";
+import { GithubOne, Home, Mail, Star } from "@icon-park/react";
 import CustomLink from "@/components/customLink";
 import Package from "../../package.json";
 
@@ -9,15 +9,17 @@ const Footer = () => {
   const homeUrl = import.meta.env.VITE_HOME_URL;
   const emailUrl = import.meta.env.VITE_EMAIL_URL;
   const siteIcp = import.meta.env.VITE_SITE_ICP;
+  const blogUrl = import.meta.env.VITE_BLOG_URL;
 
   return (
     <footer id="footer">
       <div className="social">
+        <CustomLink iconDom={<Home />} to={homeUrl} />
+        <CustomLink iconDom={<Star />} to={blogUrl} />
         <CustomLink
           iconDom={<GithubOne />}
           to={`https://github.com/${githubName}/`}
         />
-        <CustomLink iconDom={<Home />} to={homeUrl} />
         <CustomLink iconDom={<Mail />} to={`mailto:${emailUrl}`} />
       </div>
       <div className="text">

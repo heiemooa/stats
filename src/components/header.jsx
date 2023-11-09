@@ -2,12 +2,11 @@ import { useState } from "react";
 import { observer } from "mobx-react-lite";
 import { CSSTransition, SwitchTransition } from "react-transition-group";
 import { formatTimestamp } from "@/utils/timeTools";
-import { Refresh } from "@icon-park/react";
 import { message } from "antd";
 import CountUp from "react-countup";
 import useStores from "@/hooks/useStores";
 import CustomLink from "@/components/customLink";
-import { GithubOne, Home, Mail } from "@icon-park/react";
+import { GithubOne, Home, Mail, Refresh, Star } from "@icon-park/react";
 
 const Header = observer(({ getSiteData }) => {
   const [messageApi, contextHolder] = message.useMessage();
@@ -59,7 +58,7 @@ const Header = observer(({ getSiteData }) => {
           <span className="logo">{siteName}</span>
           <div className="menu-right">
             <CustomLink iconDom={<Home />} to={homeUrl} text="主页" />
-            <CustomLink iconDom={<Home />} to={blogUrl} text="博客" />
+            <CustomLink iconDom={<Star />} to={blogUrl} text="博客" />
             <CustomLink
               iconDom={<GithubOne />}
               to={`https://github.com/${githubName}/`}
