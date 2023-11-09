@@ -6,6 +6,8 @@ import { Refresh } from "@icon-park/react";
 import { message } from "antd";
 import CountUp from "react-countup";
 import useStores from "@/hooks/useStores";
+import CustomLink from "@/components/customLink";
+import { GithubOne, Home, Mail } from "@icon-park/react";
 
 const Header = observer(({ getSiteData }) => {
   const [messageApi, contextHolder] = message.useMessage();
@@ -14,6 +16,10 @@ const Header = observer(({ getSiteData }) => {
 
   // 加载配置
   const siteName = import.meta.env.VITE_SITE_NAME;
+  const githubName = import.meta.env.VITE_GITHUB_NAME;
+  const homeUrl = import.meta.env.VITE_HOME_URL;
+  const emailUrl = import.meta.env.VITE_EMAIL_URL;
+  const blogUrl = import.meta.env.VITE_BLOG_URL;
 
   // 状态文本
   const statusNames = {
@@ -51,6 +57,20 @@ const Header = observer(({ getSiteData }) => {
       <div className="container">
         <div className="menu">
           <span className="logo">{siteName}</span>
+          <div className="menu-right">
+            <CustomLink iconDom={<Home />} to={homeUrl} text="主页" />
+            <CustomLink iconDom={<Home />} to={blogUrl} text="博客" />
+            <CustomLink
+              iconDom={<GithubOne />}
+              to={`https://github.com/${githubName}/`}
+              text="Github"
+            />
+            <CustomLink
+              iconDom={<Mail />}
+              to={`mailto:${emailUrl}`}
+              text="邮件"
+            />
+          </div>
         </div>
         <div className="status">
           <div className={`icon ${status.siteState}`} />

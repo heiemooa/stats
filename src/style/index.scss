@@ -66,9 +66,23 @@ body {
         align-items: center;
         justify-content: space-between;
         padding: 0 20px;
+
         .logo {
           font-size: 20px;
           font-weight: bold;
+        }
+        .menu-right {
+          .link {
+            color: #efefef;
+            margin: 0 8px;
+            .i-icon {
+              margin-right: 2px;
+            }
+          }
+          .link:hover {
+            color: #fff;
+            font-weight: 600;
+          }
         }
       }
       .status {
@@ -287,6 +301,15 @@ body {
                     background-color: $error-background-color;
                     &::after {
                       background-color: $error-background-color;
+                    }
+                  }
+                }
+                &.unknown {
+                  color: $secondary-color;
+                  .icon {
+                    background-color: $secondary-color;
+                    &::after {
+                      background-color: $secondary-color;
                     }
                   }
                 }

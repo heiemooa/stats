@@ -1,8 +1,8 @@
-# site-status
+# stats
 
 一个基于 UptimeRobot API 的在线状态面板
 
-![IMSYY-站点监测.png](https://s1.ax1x.com/2023/07/20/pCHnLLt.png)
+![Emooa-站点监测.png](https://s1.ax1x.com/2023/07/20/pCHnLLt.png)
 
 ## 特色
 
@@ -27,25 +27,24 @@
 ### 安装依赖
 
 ```bash
-# 若没有 pnpm
-npm install pnpm -g
 
 # 安装依赖
-pnpm install
+yarn
 ```
 
 ### 开发
 
 ```bash
-pnpm dev
+yarn dev
 ```
 
 ### 打包
 
 ```bash
-pnpm build
+yarn build
 ```
 
 ## 鸣谢
 
- - [uptime-status](https://github.com/yb/uptime-status) 基于此项目进行修改
+- [site-status](https://github.com/imsyy/site-status) 基于此项目 fork
+- [uptime-status](https://github.com/yb/uptime-status) 基于此项目进行修改

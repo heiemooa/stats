@@ -5,6 +5,7 @@ import { LinkTwo } from "@icon-park/react";
 import { Tooltip, Button, Result, Modal } from "antd";
 import CustomLink from "@/components/customLink";
 import SiteCharts from "@/components/siteCharts";
+import { reverse } from "lodash";
 
 const SiteStatus = ({ siteData, days, status }) => {
   // 弹窗数据
@@ -44,17 +45,23 @@ const SiteStatus = ({ siteData, days, status }) => {
                     <CustomLink iconDom={<LinkTwo />} to={site.url} />
                     <div
                       className={`status ${
-                        site.status === "ok" ? "normal" : "error"
+                        site.status === "ok"
+                          ? "normal"
+                          : site.status === "down"
+                          ? "error"
+                          : "unknown"
                       }`}
                     >
                       <div className="icon" />
                       <span className="tip">
-                        {site.status === "ok" ? "正常访问" : "无法访问"}
+                        {site.status === "ok" && "正常访问"}
+                        {site.status === "down" && "无法访问"}
+                        {site.status === "unknown" && "不受监控"}
                       </span>
                     </div>
                   </div>
                   <div className="timeline">
-                    {site.daily.map((data, index) => {
+                    {reverse(site.daily).map((data, index) => {
                       const { uptime, down, date } = data;
                       const time = date.format("YYYY-MM-DD");
                       let status = null;
@@ -91,7 +98,11 @@ const SiteStatus = ({ siteData, days, status }) => {
                     })}
                   </div>
                   <div className="summary">
-                    <div className="now">今天</div>
+                    <div className="day">
+                      {site.daily[site.daily.length - 1].date.format(
+                        "YYYY-MM-DD"
+                      )}
+                    </div>
                     <div className="note">
                       {site.total.times
                         ? `最近 ${days} 天内故障 ${
@@ -101,11 +112,7 @@ const SiteStatus = ({ siteData, days, status }) => {
                           )}，平均可用率 ${site.average}%`
                         : `最近 ${days} 天内可用率 ${site.average}%`}
                     </div>
-                    <div className="day">
-                      {site.daily[site.daily.length - 1].date.format(
-                        "YYYY-MM-DD"
-                      )}
-                    </div>
+                    <div className="now">今天</div>
                   </div>
                 </div>
               ))}
@@ -116,7 +123,7 @@ const SiteStatus = ({ siteData, days, status }) => {
                 footer={null}
                 onOk={closeSiteDetails}
                 onCancel={closeSiteDetails}
-                bodyStyle={{ marginTop: "20px" }}
+                styles={{ body: { marginTop: "20px" } }}
               >
                 <SiteCharts siteDetails={siteDetailsData} />
               </Modal>
