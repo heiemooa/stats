@@ -1,5 +1,5 @@
 import React from "react";
-import Status from "./status";
+import Status from "./status.ts";
 import Cache from "./cache";
 
 const stores = React.createContext({

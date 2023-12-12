@@ -46,7 +46,7 @@ const Header = observer(({ getSiteData }) => {
   };
 
   return (
-    <header id="header" className={status.siteState}>
+    <header id="header" className={`${status.siteState} h-360`}>
       {contextHolder}
       <SwitchTransition mode="out-in">
         <CSSTransition key={status.siteState} classNames="fade" timeout={300}>
@@ -54,7 +54,7 @@ const Header = observer(({ getSiteData }) => {
         </CSSTransition>
       </SwitchTransition>
       <div className="container">
-        <div className="menu">
+        <div className="flex">
           <span className="logo">{siteName}</span>
           <div className="menu-right">
             <CustomLink iconDom={<Home />} to={homeUrl} text="主页" />

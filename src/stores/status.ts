@@ -8,7 +8,7 @@ class Status {
     makeAutoObservable(this);
   }
 
-  changeSiteState(val) {
+  changeSiteState(val: string) {
     this.siteState = val;
   }
   changeSiteOverview(val) {
