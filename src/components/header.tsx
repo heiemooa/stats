@@ -8,7 +8,7 @@ import useStores from "@/hooks/useStores";
 import CustomLink from "@/components/customLink";
 import { GithubOne, Home, Mail, Refresh, Star } from "@icon-park/react";
 
-const Header = observer(({ getSiteData }) => {
+const Header = observer(({ getSiteData }: { getSiteData: Function }) => {
   const [messageApi, contextHolder] = message.useMessage();
   const { status, cache } = useStores();
   const [lastClickTime, setLastClickTime] = useState(0);
@@ -29,6 +29,14 @@ const Header = observer(({ getSiteData }) => {
     wrong: "数据请求失败",
   };
 
+  const statusColor = {
+    loading: "bg-gradient-to-r from-sky-400 to-sky-500",
+    error: "bg-gradient-to-r from-rose-400 to-red-500",
+    allError: "bg-gradient-to-r from-red-400 to-red-700",
+    normal: "bg-gradient-to-r from-green-400 to-green-600",
+    wrong: "bg-gradient-to-r from-rose-400 to-red-500",
+  };
+
   // 刷新状态
   const refreshStatus = () => {
     const currentTime = Date.now();
@@ -40,39 +48,41 @@ const Header = observer(({ getSiteData }) => {
       });
       return false;
     }
-    cache.changeSiteData(null);
+    cache.removeSiteData();
     getSiteData();
     setLastClickTime(currentTime);
   };
 
   return (
-    <header id="header" className={`${status.siteState} h-360`}>
+    <header className={`${status.siteState} h-80 p-8 relative text-white`}>
       {contextHolder}
       <SwitchTransition mode="out-in">
         <CSSTransition key={status.siteState} classNames="fade" timeout={300}>
-          <div className={`cover ${status.siteState}`} />
+          <div
+            className={`${
+              statusColor[status.siteState]
+            } absolute top-0 left-0 h-full w-full -z-10`}
+          />
         </CSSTransition>
       </SwitchTransition>
-      <div className="container">
-        <div className="flex">
-          <span className="logo">{siteName}</span>
-          <div className="menu-right">
-            <CustomLink iconDom={<Home />} to={homeUrl} text="主页" />
-            <CustomLink iconDom={<Star />} to={blogUrl} text="博客" />
+      <div className="max-w-4xl flex flex-col h-full px-4 m-auto">
+        <div className="flex justify-between">
+          <span className="text-xl">{siteName}</span>
+          <div className="flex space-x-4">
+            <CustomLink icon={<Home />} to={homeUrl} text="主页" />
+            <CustomLink icon={<Star />} to={blogUrl} text="博客" />
             <CustomLink
-              iconDom={<GithubOne />}
+              icon={<GithubOne />}
               to={`https://github.com/${githubName}/`}
               text="Github"
             />
-            <CustomLink
-              iconDom={<Mail />}
-              to={`mailto:${emailUrl}`}
-              text="邮件"
-            />
+            <CustomLink icon={<Mail />} to={`mailto:${emailUrl}`} text="邮件" />
           </div>
         </div>
-        <div className="status">
-          <div className={`icon ${status.siteState}`} />
+        <div className="flex mt-auto">
+          <div
+            className={`rounded-full block bg-gray-100 mr-6 h-10 w-10 ${status.siteState} after:content-[''] after:h-full after:w-full after:rounded-full after:animate-ping after:block after:bg-inherit after:opacity-40`}
+          />
           <div className="r-text">
             <SwitchTransition mode="out-in">
               <CSSTransition
@@ -80,10 +90,12 @@ const Header = observer(({ getSiteData }) => {
                 classNames="fade"
                 timeout={300}
               >
-                <div className="text">{statusNames[status.siteState]}</div>
+                <div className="text-4xl font-bold">
+                  {statusNames[status.siteState]}
+                </div>
               </CSSTransition>
             </SwitchTransition>
-            <div className="tip">
+            <div className="text-sm mt-1 opacity-80">
               <SwitchTransition mode="out-in">
                 <CSSTransition
                   key={status.siteState}
@@ -95,15 +107,15 @@ const Header = observer(({ getSiteData }) => {
                   ) : status.siteState === "wrong" ? (
                     <span>这可能是临时性问题，请刷新后重试</span>
                   ) : (
-                    <div className="time">
-                      <span className="last-update">
+                    <div className="flex items-center">
+                      <span className="after:content-['|'] after:mx-2">
                         {`上次更新于 ${
                           formatTimestamp(cache.siteData?.timestamp).justTime
                         }`}
                       </span>
-                      <div className="update">
+                      <div className="flex items-center">
                         <span>更新频率 5 分钟</span>
-                        <Refresh className="refresh" onClick={refreshStatus} />
+                        <Refresh className="ml-1" onClick={refreshStatus} />
                       </div>
                     </div>
                   )}
@@ -113,43 +125,32 @@ const Header = observer(({ getSiteData }) => {
           </div>
           <SwitchTransition mode="out-in">
             <CSSTransition
-              key={status.siteOverview}
+              key={status.siteState}
               classNames="fade"
               timeout={300}
             >
-              {status.siteOverview ? (
-                <div className="overview">
-                  <div className="count">
-                    <span className="name">站点总数</span>
-                    <CountUp
-                      className="num"
-                      end={status.siteOverview.count}
-                      duration={1}
-                    />
+              {status.siteState !== "loading" ? (
+                <div className="ml-auto">
+                  <div className="mb-1 opacity-80">
+                    <span className="mr-1">站点总数</span>
+                    <CountUp end={status.siteOverview.count} duration={1} />
                   </div>
-                  <div className="status-num">
-                    <div className="ok-count">
-                      <span className="name">正常</span>
+                  <div className="flex text-xl">
+                    <div className="after:content-['/'] after:mx-2">
+                      <span className="mr-1">正常</span>
+                      <CountUp end={status.siteOverview.okCount} duration={1} />
+                    </div>
+                    <div>
+                      <span className="mr-1">异常</span>
                       <CountUp
-                        className="num"
-                        end={status.siteOverview.okCount}
+                        end={status.siteOverview.downCount}
                         duration={1}
                       />
-                    </div>
-                    <div className="down-count">
-                      <span className="name">异常</span>
-                      <span className="num">
-                        <CountUp
-                          className="num"
-                          end={status.siteOverview.downCount}
-                          duration={1}
-                        />
-                      </span>
                     </div>
                   </div>
                 </div>
               ) : (
-                <div className="overview" />
+                <div className="ml-auto" />
               )}
             </CSSTransition>
           </SwitchTransition>

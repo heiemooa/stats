@@ -1,35 +1,84 @@
 import { Alert, Collapse } from "antd";
 import { MacScrollbar } from "mac-scrollbar";
-import { Line } from "@ant-design/plots";
+import * as echarts from "echarts";
+import { useEffect, useRef } from "react";
+import { isEmpty, assign, map } from "lodash";
+import { ISite } from "@/stores/cache";
 
-const SiteCharts = ({ siteDetails }) => {
+const SiteCharts = ({ siteDetails }: { siteDetails: ISite }) => {
+  const chart = useRef(null);
+  const myChart = useRef<any>(null);
+
   // 处理传入数据为图表
   const dailyData = siteDetails.daily;
-  const chartData = [...dailyData].reverse().map((data) => {
-    const { uptime, date } = data;
-    return {
-      time: date.format("YYYY-MM-DD"),
-      value: uptime,
-    };
-  });
 
-  // 图标配置
-  const chartConfig = {
-    data: chartData,
-    padding: "auto",
-    xField: "time",
-    yField: "value",
-    offsetY: 0,
-    meta: {
-      value: {
-        alias: "当日可用率",
-        formatter: (v) => `${v}%`,
+  useEffect(() => {
+    init();
+    window.addEventListener("resize", function () {
+      init();
+    });
+    return () => {
+      window.removeEventListener("resize", function () {
+        init();
+      });
+    };
+  }, [JSON.stringify(dailyData)]);
+
+  const init = () => {
+    if (!chart.current) return;
+    myChart.current?.dispose?.();
+    myChart.current = echarts.init(chart.current);
+
+    const chartData = [...dailyData].reverse().map((data) => {
+      const { uptime, date } = data;
+      return {
+        time: date.format("YYYY-MM-DD"),
+        value: Number(uptime),
+      };
+    });
+
+    if (isEmpty(chartData)) return;
+    const option = assign({
+      xAxis: {
+        type: "category",
+        data: map(chartData, (item) => item.time),
       },
-    },
-    xAxis: {
-      tickCount: chartData.length,
-    },
-    smooth: true,
+      yAxis: {
+        type: "value",
+        axisLabel: {
+          formatter: "{value} %",
+        },
+      },
+      series: [
+        {
+          data: map(chartData, (item) => item.value),
+          type: "line",
+          smooth: true,
+          showSymbol: false,
+          tooltip: {
+            valueFormatter: (value: number) => `${value} %`,
+          },
+        },
+      ],
+      graphic: isEmpty(chartData)
+        ? [
+            {
+              type: "text",
+              left: "center",
+              top: "middle",
+              style: {
+                text: "暂无数据",
+                fontSize: 18,
+                fill: "#999",
+              },
+            },
+          ]
+        : [],
+      tooltip: {
+        trigger: "axis",
+      },
+    });
+    myChart.current.setOption(option, true);
   };
 
   return (
@@ -56,8 +105,8 @@ const SiteCharts = ({ siteDetails }) => {
             showIcon
           />
         )}
-        <div className="all">
-          <Line {...chartConfig} />
+        <div>
+          <div ref={chart} className="w-full h-96" />
           <Collapse
             style={{ marginTop: "20px" }}
             items={[

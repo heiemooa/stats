@@ -1,9 +1,32 @@
 import { makeAutoObservable } from "mobx";
 import { makePersistable, isHydrated } from "mobx-persist-store";
 
+interface IDaily {
+  uptime: number;
+  down: { times: number; duration: number };
+  date: any;
+}
+export interface ISite {
+  id: number;
+  name: string;
+  average: number;
+  url: string;
+  total: {
+    times: number;
+    duration: number;
+  };
+  status: "ok" | "down" | "unknown";
+  daily: IDaily[];
+}
+
+interface ISiteData {
+  data: ISite[];
+  timestamp: number;
+}
+
 class Cache {
   // 站点数据
-  siteData = null;
+  siteData?: ISiteData | null;
 
   constructor() {
     makeAutoObservable(this);
@@ -15,7 +38,7 @@ class Cache {
     });
   }
 
-  changeSiteData(val) {
+  changeSiteData(val: ISiteData) {
     this.siteData = val;
   }
 

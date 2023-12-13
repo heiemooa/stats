@@ -1,6 +1,12 @@
+import React from "react";
+
 // 超链接组件
-const CustomLink = (props) => {
-  const { text, to, iconDom } = props;
+const CustomLink = (props: {
+  text?: string;
+  to: string;
+  icon?: React.ReactNode;
+}) => {
+  const { text, to, icon } = props;
 
   // 检查链接
   const url =
@@ -11,9 +17,14 @@ const CustomLink = (props) => {
       : `//${to}`;
 
   return (
-    <a className="link" title={text} href={url} target="_blank">
-      {iconDom}
-      {text}
+    <a
+      className="flex items-center space-x-1"
+      title={text}
+      href={url}
+      target="_blank"
+    >
+      {icon}
+      <span>{text}</span>
     </a>
   );
 };
