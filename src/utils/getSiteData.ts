@@ -10,11 +10,16 @@ import dayjs from "dayjs";
  * @param {Object} status - mobx-status
  * @returns {Promise<Array>} - 处理后的监控数据
  */
-export const getSiteData = async (apikey, days, cache, status) => {
+export const getSiteData = async (
+  apikey: string,
+  days: number,
+  cache: any,
+  status: any
+) => {
   try {
     status.changeSiteState("loading");
-    
-    const dates = [];
+
+    const dates: dayjs.Dayjs[] = [];
     const today = dayjs(new Date().setHours(0, 0, 0, 0));
 
     // 生成日期范围数组
@@ -44,7 +49,7 @@ export const getSiteData = async (apikey, days, cache, status) => {
           const delay = Math.floor(Math.random() * (1200 - 500 + 1)) + 500;
           setTimeout(() => {
             const processedData = dataProcessing(data, dates);
-            console.log("触发缓存");
+            console.log("触发缓存", processedData);
             changeSite(processedData, status);
             resolve(processedData);
           }, delay);
@@ -91,7 +96,18 @@ export const getSiteData = async (apikey, days, cache, status) => {
  * @param {Object} data - 请求数据
  * @returns {Promise<Object>} - 监控数据的响应
  */
-const getMonitorsData = async (postdata, status) => {
+const getMonitorsData = async (
+  postdata: {
+    api_key: string;
+    format: string;
+    logs: number;
+    log_types: string;
+    logs_start_date: number;
+    logs_end_date: number;
+    custom_uptime_ranges: string;
+  },
+  status: { changeSiteState: (arg0: string) => void }
+) => {
   try {
     const globalApi = import.meta.env.VITE_GLOBAL_API;
     const response = await axios.post(globalApi, postdata, { timeout: 10000 });
@@ -108,14 +124,18 @@ const getMonitorsData = async (postdata, status) => {
  * @param {Array} dates - 日期数组
  * @returns {Array} - 处理后的数据
  */
-const dataProcessing = (data, dates) => {
+const dataProcessing = (data: any[], dates: any[]) => {
   return data?.map((monitor) => {
     const ranges = monitor.custom_uptime_ranges.split("-");
     const average = formatNumber(ranges.pop());
-    const daily = [];
-    const map = [];
+    const daily: {
+      date: dayjs.Dayjs;
+      uptime: string;
+      down: { times: number; duration: number };
+    }[] = [];
+    const map: { [key: string]: any } = {};
 
-    dates.forEach((date, index) => {
+    dates.forEach((date, index: number) => {
       map[date.format("YYYYMMDD")] = index;
       daily[index] = {
         date: date,
@@ -130,7 +150,10 @@ const dataProcessing = (data, dates) => {
      * @param {Object} log - 日志数据
      * @returns {Object} - 更新后的总数
      */
-    const calculateTotal = (total, log) => {
+    const calculateTotal = (
+      total: { duration: any; times: number },
+      log: { type: number; datetime: number; duration: any }
+    ) => {
       if (log.type === 1) {
         const date = dayjs.unix(log.datetime).format("YYYYMMDD");
         total.duration += log.duration;
@@ -168,20 +191,43 @@ const dataProcessing = (data, dates) => {
  * @param {Array} data - 站点数据
  * @param {Object} status - mobx-status
  */
-const changeSite = (data, status) => {
+const changeSite = (
+  data: any[],
+  status: {
+    changeSiteState: (arg0: string) => void;
+    changeSiteOverview: (arg0: {
+      count: any;
+      okCount: any;
+      /**
+       * 获取监控数据
+       * @param {string} apikey - UptimeRobot的API密钥
+       * @param {number} days - 获取的天数
+       * @param {Object} cache - mobx-cache
+       * @param {Object} status - mobx-status
+       * @returns {Promise<Array>} - 处理后的监控数据
+       */
+      downCount: any;
+    }) => void;
+  }
+) => {
   try {
     // 统计数据
-    const isAllStatusOk = data.every((item) => item.status === "ok");
+    const isAllStatusOk = data.every(
+      (item) => item.status === "ok" || item.status === "unknown"
+    );
     const isAnyStatusOk = data.some((item) => item.status === "ok");
     const okCount = data.filter((item) => item.status === "ok").length;
     const downCount = data.filter((item) => item.status === "down").length;
 
     // 更改图标
-    const faviconLink = document.querySelector('link[rel="shortcut icon"]');
-    faviconLink.href = isAllStatusOk
-      ? "./images/favicon.ico"
-      : "./images/favicon-down.ico";
-
+    const faviconLink: any = document.querySelector(
+      'link[rel="shortcut icon"]'
+    );
+    if (faviconLink) {
+      faviconLink.href = isAllStatusOk
+        ? "./images/favicon.ico"
+        : "./images/favicon-down.ico";
+    }
     // 更改状态
     if (isAllStatusOk) {
       status.changeSiteState("normal");

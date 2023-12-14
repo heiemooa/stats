@@ -12,32 +12,31 @@ const Footer = () => {
   const blogUrl = import.meta.env.VITE_BLOG_URL;
 
   return (
-    <footer id="footer">
-      <div className="social">
-        <CustomLink iconDom={<Home />} to={homeUrl} />
-        <CustomLink iconDom={<Star />} to={blogUrl} />
+    <footer className="text-center text-gray-500 my-12">
+      <div className="flex justify-center space-x-4">
+        <CustomLink icon={<Home />} to={homeUrl} />
+        <CustomLink icon={<Star />} to={blogUrl} />
         <CustomLink
-          iconDom={<GithubOne />}
+          icon={<GithubOne />}
           to={`https://github.com/${githubName}/`}
         />
-        <CustomLink iconDom={<Mail />} to={`mailto:${emailUrl}`} />
+        <CustomLink icon={<Mail />} to={`mailto:${emailUrl}`} />
       </div>
-      <div className="text">
-        <p>
+      <div className="leading-6	mt-2 text-sm">
+        <p className="flex justify-center">
           <CustomLink
-            text={Package.alia}
+            text={Package.name}
             to="https://github.com/heiemooa/stats"
           />
           &nbsp;Version&nbsp;{Package.version}
         </p>
-        <p>
+        <p className="flex justify-center">
           基于&nbsp;
           <CustomLink to="https://uptimerobot.com/" text="UptimeRobot" />
           &nbsp;接口&nbsp;|&nbsp;检测频率 5 分钟
         </p>
-        <p>
-          Copyright&nbsp;&copy;&nbsp;2023&nbsp;-&nbsp;{new Date().getFullYear()}
-          &nbsp;
+        <p className="flex justify-center space-x-2">
+          <span>Copyright &copy; 2023 - {new Date().getFullYear()}</span>
           <CustomLink to="https://emooa.com" text="Emooa" />
           {siteIcp ? (
             <React.Fragment>

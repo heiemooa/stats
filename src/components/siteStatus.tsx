@@ -6,14 +6,26 @@ import { Tooltip, Button, Result, Modal } from "antd";
 import CustomLink from "@/components/customLink";
 import SiteCharts from "@/components/siteCharts";
 import { reverse } from "lodash";
+import useStores from "@/hooks/useStores";
+import { observer } from "mobx-react-lite";
+import { ISite } from "@/stores/cache";
+import { isEmpty } from "lodash";
 
-const SiteStatus = ({ siteData, days, status }) => {
+const SiteStatus = ({
+  siteData,
+  days,
+}: {
+  siteData: ISite[];
+  days: number;
+}) => {
+  const { status } = useStores();
+
   // 弹窗数据
   const [siteDetailsShow, setSiteDetailsShow] = useState(false);
-  const [siteDetailsData, setSiteDetailsData] = useState(null);
+  const [siteDetailsData, setSiteDetailsData] = useState<ISite | null>(null);
 
   // 开启弹窗
-  const showSiteDetails = (data) => {
+  const showSiteDetails = (data: ISite) => {
     setSiteDetailsShow(true);
     setSiteDetailsData(data);
   };
@@ -28,52 +40,57 @@ const SiteStatus = ({ siteData, days, status }) => {
     <SwitchTransition mode="out-in">
       <CSSTransition key={status.siteState} classNames="fade" timeout={100}>
         {status.siteState !== "wrong" ? (
-          status.siteState !== "loading" && siteData ? (
-            <div className="sites">
-              {siteData.map((site) => (
+          status.siteState !== "loading" && !isEmpty(siteData) ? (
+            <div>
+              {siteData.map((site: ISite) => (
                 <div
                   key={site.id}
-                  className={`site ${
-                    site.status !== "ok" ? "error" : "normal"
+                  className={`cursor-pointer p-7 border-b border-gray-200 duration-300 transition-all first:hover:rounded-lg last:hover:rounded-lg	last:border-b-0 hover:bg-gray-100 hover:transition-all hover:duration-300 ${
+                    site.status !== "ok" ? "bg-red-50" : ""
                   }`}
                   onClick={() => {
                     showSiteDetails(site);
                   }}
                 >
-                  <div className="meta">
-                    <div className="name">{site.name}</div>
-                    <CustomLink iconDom={<LinkTwo />} to={site.url} />
+                  <div className="flex">
+                    <div>{site.name}</div>
+                    <CustomLink
+                      icon={
+                        <LinkTwo className="ml-2 text-gray-400 hover:text-green-500" />
+                      }
+                      to={site.url}
+                    />
                     <div
-                      className={`status ${
+                      className={`ml-auto ${
                         site.status === "ok"
-                          ? "normal"
+                          ? "text-green-500"
                           : site.status === "down"
-                          ? "error"
-                          : "unknown"
+                          ? "text-red-500"
+                          : "text-gray-500"
                       }`}
                     >
                       <div className="icon" />
-                      <span className="tip">
+                      <span className="text-sm">
                         {site.status === "ok" && "正常访问"}
                         {site.status === "down" && "无法访问"}
                         {site.status === "unknown" && "不受监控"}
                       </span>
                     </div>
                   </div>
-                  <div className="timeline">
-                    {reverse(site.daily).map((data, index) => {
+                  <div className="my-4 flex">
+                    {reverse([...site.daily]).map((data, index: number) => {
                       const { uptime, down, date } = data;
                       const time = date.format("YYYY-MM-DD");
                       let status = null;
                       let tooltipText = null;
                       if (uptime >= 100) {
-                        status = "normal";
+                        status = "bg-green-500";
                         tooltipText = `可用率 ${formatNumber(uptime)}%`;
                       } else if (uptime <= 0 && down.times === 0) {
-                        status = "none";
+                        status = "bg-gray-300";
                         tooltipText = "无数据";
                       } else {
-                        status = "error";
+                        status = "bg-red-400";
                         tooltipText = `故障 ${
                           down.times
                         } 次，累计 ${formatDuration(
@@ -83,21 +100,24 @@ const SiteStatus = ({ siteData, days, status }) => {
                       return (
                         <Tooltip
                           key={index}
-                          // trigger={["hover", "click"]}
                           title={
-                            <div className="status-tooltip">
-                              <div className="time">{time}</div>
-                              <div className="text">{tooltipText}</div>
+                            <div>
+                              <div className="text-xs text-gray-400">
+                                {time}
+                              </div>
+                              <div>{tooltipText}</div>
                             </div>
                           }
                           destroyTooltipOnHide
                         >
-                          <div className={`line ${status}`} />
+                          <div
+                            className={`mx-px h-7 grow rounded-lg	${status}`}
+                          />
                         </Tooltip>
                       );
                     })}
                   </div>
-                  <div className="summary">
+                  <div className="flex text-gray-500 text-xs justify-between">
                     <div className="day">
                       {site.daily[site.daily.length - 1].date.format(
                         "YYYY-MM-DD"
@@ -118,18 +138,24 @@ const SiteStatus = ({ siteData, days, status }) => {
               ))}
               {/* 站点详情 */}
               <Modal
+                destroyOnClose
                 title={siteDetailsData?.name}
                 open={siteDetailsShow}
                 footer={null}
                 onOk={closeSiteDetails}
                 onCancel={closeSiteDetails}
+                width="80%"
                 styles={{ body: { marginTop: "20px" } }}
               >
-                <SiteCharts siteDetails={siteDetailsData} />
+                {siteDetailsData && (
+                  <SiteCharts siteDetails={siteDetailsData} />
+                )}
               </Modal>
             </div>
           ) : (
-            <div className="loading" />
+            <div className="h-40 flex justify-center items-center">
+              <div className="animate-spin h-8 w-8 rounded-full	border-4 border-t-gray-500 m-auto" />
+            </div>
           )
         ) : (
           <Result
@@ -153,4 +179,4 @@ const SiteStatus = ({ siteData, days, status }) => {
   );
 };
 
-export default SiteStatus;
+export default observer(SiteStatus);
