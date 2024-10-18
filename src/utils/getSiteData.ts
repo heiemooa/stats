@@ -40,7 +40,7 @@ export const getSiteData = async (
 
     // 检查是否有可用缓存数据
     if (cache.siteData !== null) {
-      const { data, timestamp } = cache.siteData;
+      const { data, timestamp } = cache.siteData || {};
       // 当前时间
       const currentTime = new Date().getTime();
       // 检查缓存是否在有效期内
